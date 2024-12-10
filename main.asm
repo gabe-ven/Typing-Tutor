@@ -61,8 +61,12 @@ correctChars DWORD 0
 totalChars DWORD 0
 accuracy DWORD 0
 wpm DWORD 0
+highestAccuracy DWORD 0
+highestWpm DWORD 0
 accuracyMessage BYTE "Accuracy: ", 0
 wpmMessage BYTE "WPM: ", 0
+highestAccuracyMessage BYTE "Highest Accuracy: ", 0
+highestWpmMessage BYTE "Highest WPM: ", 0
 msec DWORD 0
 
 .code
@@ -637,9 +641,14 @@ Score PROC
     mov eax, [accuracy]
     call WriteDec
     call Crlf
-    jmp WPM_CALCULATION          
 
-NO_ACCURACY:
+    mov eax, [accuracy]
+    cmp eax, [highestAccuracy]
+    jle SKIP_HIGHEST_ACCURACY
+    mov [highestAccuracy], eax
+
+SKIP_HIGHEST_ACCURACY:
+
 
 WPM_CALCULATION:
     mov edx, OFFSET wpmMessage
@@ -656,6 +665,25 @@ WPM_CALCULATION:
     call WriteDec
     call Crlf
 
+    mov eax, [wpm]
+    cmp eax, [highestWpm]
+    jle SKIP_HIGHEST_WPM
+    mov [highestWpm], eax
+
+SKIP_HIGHEST_WPM:
+
+    mov edx, OFFSET highestAccuracyMessage
+    call WriteString
+    mov eax, [highestAccuracy]
+    call WriteDec
+    call Crlf
+
+    mov edx, OFFSET highestWpmMessage
+    call WriteString
+    mov eax, [highestWpm]
+    call WriteDec
+    call Crlf
+
     mov edx, OFFSET outMessage
     call WriteString
 
@@ -667,8 +695,14 @@ WPM_CALCULATION:
     call Clrscr
     call MainMenu
 
-    ret
+ NO_ACCURACY:
+    mov edx, OFFSET accuracyMessage
+    call WriteString
 
+    call Crlf
+    jmp WPM_CALCULATION
+
+    ret
 Score ENDP
 
 END main
